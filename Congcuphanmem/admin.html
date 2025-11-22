@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CinePro - All in One</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Outfit', sans-serif; }
+        
+      
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+       
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        
+        .input-field {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+        .input-field:focus {
+            border-color: #ec4899;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.2);
+        }
+
+        .tab-content { display: none; animation: fadeEffect 0.5s; }
+        .tab-content.active { display: block; }
+        
+       
+        @keyframes fadeEffect {
+            from {opacity: 0; transform: translateY(10px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+        
+       
+        .modal-enter { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+       
+        .nav-btn.active {
+            background-color: #db2777;
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(236, 72, 153, 0.3);
+        }
+
+      
+        .filter-btn.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-[#0f172a] text-white min-h-screen flex overflow-hidden">
+
+  
+    <aside class="w-72 bg-[#020617] border-r border-gray-800 flex flex-col p-6 fixed h-full z-20">
+        <div class="mb-10 flex items-center gap-3 text-pink-500">
+            <i class="fa-solid fa-film text-3xl"></i>
+            <span class="text-2xl font-bold tracking-wider text-white">CINE<span class="text-pink-500">PRO</span></span>
+        </div>
+        
+        <nav class="space-y-2 flex-1">
+            <button onclick="showTab('lich-su')" id="btn-lich-su" class="nav-btn active w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-gray-400 hover:bg-white/5 hover:text-white">
+                <i class="fa-solid fa-ticket w-6 text-center"></i>
+                <span class="font-medium">Vé Của Tôi</span>
+            </button>
+            <button onclick="showTab('thanh-toan')" id="btn-thanh-toan" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-gray-400 hover:bg-white/5 hover:text-white">
+                <i class="fa-regular fa-credit-card w-6 text-center"></i>
+                <span class="font-medium">Thanh Toán</span>
+            </button>
+            <button onclick="showTab('admin')" id="btn-admin" class="nav-btn w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all text-gray-400 hover:bg-white/5 hover:text-white">
+                <i class="fa-solid fa-sliders w-6 text-center"></i>
+                <span class="font-medium">Quản Lý Lịch Chiếu</span>
+            </button>
+        </nav>
+
+        <div class="mt-auto pt-6 border-t border-gray-800">
+            <div class="flex items-center gap-3">
+                <img src="https://ui-avatars.com/api/?name=User&background=random" class="w-10 h-10 rounded-full">
+                <div>
+                    <p class="text-sm font-bold">Nguyễn Văn A</p>
+                    <p class="text-xs text-gray-500">Thành viên Vàng</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+
+    <main class="flex-1 ml-72 p-10 h-screen overflow-y-auto bg-[url('https://tailwindcss.com/img/beams-home@95.jpg')] bg-cover bg-fixed">
+        
+      
+        <div id="lich-su" class="tab-content active">
+            <header class="flex justify-between items-center mb-10">
+                <h1 class="text-3xl font-bold">Lịch Sử Đặt Vé</h1>
+                <button class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition">
+                    <i class="fa-regular fa-bell"></i>
+                </button>
+            </header>
+
+      
+            <div class="flex gap-4 mb-8">
+                <button onclick="filterTickets('all', this)" class="filter-btn active px-5 py-2 rounded-full text-gray-400 border border-transparent hover:bg-white/5 transition font-medium">Tất cả</button>
+                <button onclick="filterTickets('upcoming', this)" class="filter-btn px-5 py-2 rounded-full text-gray-400 border border-transparent hover:bg-white/5 transition font-medium">Sắp chiếu</button>
+                <button onclick="filterTickets('watched', this)" class="filter-btn px-5 py-2 rounded-full text-gray-400 border border-transparent hover:bg-white/5 transition font-medium">Đã xem</button>
+            </div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6" id="ticket-list">
+                
+                
+                <div class="ticket-item glass-card p-5 rounded-2xl flex gap-5 hover:border-pink-500/50 transition group" data-status="watched">
+                    <div class="w-32 h-48 flex-shrink-0 overflow-hidden rounded-xl relative">
+                        <img src="https://image.tmdb.org/t/p/w300/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        <div class="absolute top-2 left-2 bg-green-500 text-black text-[10px] font-bold px-2 py-1 rounded">ĐÃ XEM</div>
+                    </div>
+                    <div class="flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold mb-1">The Shawshank Redemption</h3>
+                            <p class="text-gray-400 text-sm"><i class="fa-solid fa-location-dot mr-1 text-pink-500"></i> CGV Aeon Mall - Rạp 05</p>
+                        </div>
+                        <div class="flex justify-between items-end bg-white/5 p-3 rounded-xl border border-white/5">
+                            <div>
+                                <p class="text-xs text-gray-400">Ngày chiếu</p>
+                                <p class="font-bold text-lg">20/11 <span class="text-sm font-normal text-gray-400">| 19:30</span></p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-gray-400">Ghế</p>
+                                <p class="font-bold text-lg">H12, H13</p>
+                            </div>
+                        </div>
+                        <button onclick="openTicketModal('The Shawshank Redemption', 'CGV Aeon Mall - Rạp 05', '19:30 - 20/11', 'H12, H13', '180.000đ', 'watched')" class="w-full mt-3 py-2 rounded-lg border border-pink-500 text-pink-500 font-medium hover:bg-pink-500 hover:text-white transition text-sm">
+                            <i class="fa-solid fa-qrcode mr-2"></i> Xem QR Code Check-in
+                        </button>
+                    </div>
+                </div>
+
+                
+                <div class="ticket-item glass-card p-5 rounded-2xl flex gap-5 hover:border-pink-500/50 transition group" data-status="upcoming">
+                    <div class="w-32 h-48 flex-shrink-0 overflow-hidden rounded-xl relative">
+                        <img src="https://image.tmdb.org/t/p/w300/rCzpDGLbOoPwLjy3OAm5NUPOTrC.jpg" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        <div class="absolute top-2 left-2 bg-yellow-500 text-black text-[10px] font-bold px-2 py-1 rounded">CHỜ THANH TOÁN</div>
+                    </div>
+                    <div class="flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold mb-1">Lord of the Rings</h3>
+                            <p class="text-gray-400 text-sm"><i class="fa-solid fa-location-dot mr-1 text-pink-500"></i> Lotte Cinema - Rạp IMAX</p>
+                        </div>
+                        <div class="flex justify-between items-end bg-white/5 p-3 rounded-xl border border-white/5">
+                            <div>
+                                <p class="text-xs text-gray-400">Ngày chiếu</p>
+                                <p class="font-bold text-lg">22/11 <span class="text-sm font-normal text-gray-400">| 21:00</span></p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-gray-400">Ghế</p>
+                                <p class="font-bold text-lg">A01, A02</p>
+                            </div>
+                        </div>
+                        <button onclick="showTab('thanh-toan')" class="block text-center w-full mt-3 py-2 rounded-lg bg-pink-600 text-white font-medium hover:bg-pink-700 transition text-sm shadow-lg shadow-pink-500/20">
+                            Thanh Toán Ngay
+                        </button>
+                    </div>
+                </div>
+
+          
+                <div class="ticket-item glass-card p-5 rounded-2xl flex gap-5 hover:border-pink-500/50 transition group" data-status="upcoming">
+                    <div class="w-32 h-48 flex-shrink-0 overflow-hidden rounded-xl relative">
+                        <img src="https://image.tmdb.org/t/p/w300/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        <div class="absolute top-2 left-2 bg-blue-500 text-white text-[10px] font-bold px-2 py-1 rounded">SẮP CHIẾU</div>
+                    </div>
+                    <div class="flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold mb-1">Avatar: Way of Water</h3>
+                            <p class="text-gray-400 text-sm"><i class="fa-solid fa-location-dot mr-1 text-pink-500"></i> Galaxy Nguyễn Du - Rạp 02</p>
+                        </div>
+                        <div class="flex justify-between items-end bg-white/5 p-3 rounded-xl border border-white/5">
+                            <div>
+                                <p class="text-xs text-gray-400">Ngày chiếu</p>
+                                <p class="font-bold text-lg">24/11 <span class="text-sm font-normal text-gray-400">| 18:00</span></p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-gray-400">Ghế</p>
+                                <p class="font-bold text-lg">F05, F06</p>
+                            </div>
+                        </div>
+                        <button class="w-full mt-3 py-2 rounded-lg bg-gray-700 text-gray-300 font-medium cursor-not-allowed text-sm">
+                            Vé đã đặt cọc
+                        </button>
+                    </div>
+                </div>
+
+              
+                <div class="ticket-item glass-card p-5 rounded-2xl flex gap-5 hover:border-pink-500/50 transition group" data-status="upcoming">
+                    <div class="w-32 h-48 flex-shrink-0 overflow-hidden rounded-xl relative">
+                        <img src="https://image.tmdb.org/t/p/w300/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        <div class="absolute top-2 left-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded">SẮP CHIẾU</div>
+                    </div>
+                    <div class="flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-xl font-bold mb-1">Dune: Part Two</h3>
+                            <p class="text-gray-400 text-sm"><i class="fa-solid fa-location-dot mr-1 text-pink-500"></i> CGV Landmark - IMAX Laser</p>
+                        </div>
+                        <div class="flex justify-between items-end bg-white/5 p-3 rounded-xl border border-white/5">
+                            <div>
+                                <p class="text-xs text-gray-400">Ngày chiếu</p>
+                                <p class="font-bold text-lg">25/11 <span class="text-sm font-normal text-gray-400">| 20:30</span></p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-gray-400">Ghế</p>
+                                <p class="font-bold text-lg">VIP J10</p>
+                            </div>
+                        </div>
+                        <button onclick="openTicketModal('Dune: Part Two', 'CGV Landmark - IMAX Laser', '20:30 - 25/11', 'VIP J10', '250.000đ', 'upcoming')" class="w-full mt-3 py-2 rounded-lg border border-pink-500 text-pink-500 font-medium hover:bg-pink-500 hover:text-white transition text-sm">
+                            Chi tiết vé
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+      
+        <div id="thanh-toan" class="tab-content">
+            <div class="flex flex-col lg:flex-row gap-8 w-full max-w-5xl mx-auto mt-10">
+             
+                <div class="flex-1 space-y-6">
+                    <h2 class="text-3xl font-bold mb-2">Cổng Thanh Toán</h2>
+                    <p class="text-gray-400 mb-6">Vui lòng hoàn tất trong <span class="text-pink-500 font-bold">04:59</span> để giữ ghế.</p>
+                    <div class="relative h-56 w-96 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl shadow-2xl p-6 text-white overflow-hidden transform transition hover:scale-105 duration-500 mx-auto lg:mx-0">
+                        <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-10 blur-3xl"></div>
+                        <div class="flex justify-between items-start mb-8">
+                            <i class="fa-brands fa-cc-mastercard text-4xl"></i>
+                            <span class="font-mono text-lg tracking-widest opacity-80">DEBIT</span>
+                        </div>
+                        <div class="mt-4">
+                            <p class="font-mono text-2xl tracking-wider drop-shadow-md">4582 1234 8899 0000</p>
+                        </div>
+                        <div class="flex justify-between mt-8">
+                            <div>
+                                <p class="text-[10px] uppercase opacity-75 tracking-wider">Card Holder</p>
+                                <p class="font-bold tracking-wide uppercase text-sm">NGUYEN VAN A</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] uppercase opacity-75 tracking-wider">Expires</p>
+                                <p class="font-bold text-sm">12/25</p>
+                            </div>
+                        </div>
+                    </div>
+                    <form class="glass-panel p-6 rounded-2xl space-y-4">
+                        <div>
+                            <label class="block text-xs uppercase text-gray-400 font-bold mb-2">Chủ thẻ</label>
+                            <input type="text" class="input-field w-full p-3 rounded-lg text-white" placeholder="Tên in trên thẻ">
+                        </div>
+                        <div>
+                            <label class="block text-xs uppercase text-gray-400 font-bold mb-2">Số thẻ</label>
+                            <input type="text" class="input-field w-full p-3 rounded-lg text-white" placeholder="0000 0000 0000 0000">
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-1/2">
+                                <label class="block text-xs uppercase text-gray-400 font-bold mb-2">Hết hạn</label>
+                                <input type="text" class="input-field w-full p-3 rounded-lg text-white" placeholder="MM/YY">
+                            </div>
+                            <div class="w-1/2">
+                                <label class="block text-xs uppercase text-gray-400 font-bold mb-2">CVC/CVV</label>
+                                <input type="password" class="input-field w-full p-3 rounded-lg text-white" placeholder="123">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="w-full lg:w-80">
+                    <div class="glass-panel p-6 rounded-2xl sticky top-10">
+                        <h3 class="text-xl font-bold mb-6 border-b border-gray-700 pb-4">Hóa Đơn</h3>
+                        <div class="flex gap-3 mb-4">
+                            <img src="https://image.tmdb.org/t/p/w200/rCzpDGLbOoPwLjy3OAm5NUPOTrC.jpg" class="w-16 h-24 rounded object-cover">
+                            <div>
+                                <h4 class="font-bold text-sm">Lord of the Rings</h4>
+                                <p class="text-xs text-gray-400 mt-1">2D Phụ Đề</p>
+                                <p class="text-xs text-gray-400">Rạp IMAX</p>
+                            </div>
+                        </div>
+                        <div class="space-y-3 text-sm mb-6">
+                            <div class="flex justify-between"><span class="text-gray-400">Ghế (x2)</span><span>180.000đ</span></div>
+                            <div class="flex justify-between"><span class="text-gray-400">Combo Bắp Nước</span><span>75.000đ</span></div>
+                            <div class="flex justify-between"><span class="text-gray-400">Phí dịch vụ</span><span>10.000đ</span></div>
+                            <div class="border-t border-gray-700 pt-3 flex justify-between items-center">
+                                <span class="font-bold">TỔNG CỘNG</span>
+                                <span class="text-2xl font-bold text-pink-500">265.000đ</span>
+                            </div>
+                        </div>
+                        <button class="w-full bg-pink-600 hover:bg-pink-500 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-pink-500/25 transition transform active:scale-95">
+                            THANH TOÁN NGAY
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+      
+        <div id="admin" class="tab-content">
+            <header class="flex justify-between items-center mb-10">
+                <div>
+                    <h1 class="text-3xl font-bold">Quản Lý Suất Chiếu</h1>
+                    <p class="text-gray-400 mt-1">Hôm nay: 22 Tháng 11, 2024</p>
+                </div>
+                <button class="bg-white text-black px-5 py-2.5 rounded-lg font-bold flex items-center gap-2 hover:bg-gray-200 transition shadow-lg shadow-white/10">
+                    <i class="fa-solid fa-plus"></i> Thêm Suất Mới
+                </button>
+            </header>
+           
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="glass-panel p-5 rounded-2xl">
+                    <p class="text-gray-400 text-sm mb-1">Tổng suất chiếu</p>
+                    <p class="text-2xl font-bold">42</p>
+                </div>
+                <div class="glass-panel p-5 rounded-2xl">
+                    <p class="text-gray-400 text-sm mb-1">Phòng đang chiếu</p>
+                    <p class="text-2xl font-bold text-green-400">08 <span class="text-xs font-normal text-gray-500">/ 12</span></p>
+                </div>
+                <div class="glass-panel p-5 rounded-2xl">
+                    <p class="text-gray-400 text-sm mb-1">Vé đã bán</p>
+                    <p class="text-2xl font-bold text-pink-400">385</p>
+                </div>
+                <div class="glass-panel p-5 rounded-2xl">
+                    <p class="text-gray-400 text-sm mb-1">Tỷ lệ lấp đầy</p>
+                    <p class="text-2xl font-bold text-yellow-400">76%</p>
+                </div>
+            </div>
+            <div class="glass-panel rounded-2xl overflow-hidden shadow-xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-[#0f172a]/50 text-gray-400 text-xs uppercase tracking-wider border-b border-gray-700">
+                                <th class="p-5">Thông tin Phim</th>
+                                <th class="p-5">Phòng & Định dạng</th>
+                                <th class="p-5">Thời gian</th>
+                                <th class="p-5">Tình trạng vé</th>
+                                <th class="p-5 text-right">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm divide-y divide-gray-700">
+                            <tr class="hover:bg-white/5 transition">
+                                <td class="p-5">
+                                    <div class="flex items-center gap-3">
+                                        <img src="https://image.tmdb.org/t/p/w200/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg" class="w-10 h-14 rounded object-cover bg-gray-700">
+                                        <div>
+                                            <p class="font-bold text-white">The Shawshank Redemption</p>
+                                            <p class="text-xs text-gray-500">142 phút</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="p-5">
+                                    <p class="font-medium">Phòng 01</p>
+                                    <span class="inline-block mt-1 px-2 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[10px] font-bold">IMAX</span>
+                                </td>
+                                <td class="p-5 text-gray-300">19:30 - 21:52</td>
+                                <td class="p-5">
+                                    <div class="w-24 bg-gray-700 rounded-full h-1.5 mb-2 mt-1">
+                                        <div class="bg-green-500 h-1.5 rounded-full" style="width: 85%"></div>
+                                    </div>
+                                    <p class="text-xs text-green-400">Đã bán 85%</p>
+                                </td>
+                                <td class="p-5 text-right space-x-2">
+                                    <button class="text-gray-400 hover:text-white p-2 rounded hover:bg-gray-700"><i class="fa-solid fa-pen"></i></button>
+                                    <button class="text-red-400 hover:text-red-300 p-2 rounded hover:bg-red-900/30"><i class="fa-solid fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-white/5 transition">
+                                <td class="p-5">
+                                    <div class="flex items-center gap-3">
+                                        <img src="https://image.tmdb.org/t/p/w200/8kOWDBK6XlPUzckuHDo3wwVRFwt.jpg" class="w-10 h-14 rounded object-cover bg-gray-700">
+                                        <div>
+                                            <p class="font-bold text-white">The Matrix</p>
+                                            <p class="text-xs text-gray-500">136 phút</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="p-5">
+                                    <p class="font-medium">Phòng 03</p>
+                                    <span class="inline-block mt-1 px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-bold">2D SUB</span>
+                                </td>
+                                <td class="p-5 text-gray-300">20:00 - 22:16</td>
+                                <td class="p-5">
+                                    <div class="w-24 bg-gray-700 rounded-full h-1.5 mb-2 mt-1">
+                                        <div class="bg-yellow-500 h-1.5 rounded-full" style="width: 40%"></div>
+                                    </div>
+                                    <p class="text-xs text-yellow-400">Đã bán 40%</p>
+                                </td>
+                                <td class="p-5 text-right space-x-2">
+                                    <button class="text-gray-400 hover:text-white p-2 rounded hover:bg-gray-700"><i class="fa-solid fa-pen"></i></button>
+                                    <button class="text-red-400 hover:text-red-300 p-2 rounded hover:bg-red-900/30"><i class="fa-solid fa-trash"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+
+    <div id="ticket-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity" onclick="closeTicketModal()"></div>
+        
+       
+        <div class="relative w-full max-w-md max-h-[95vh] overflow-y-auto">
+            <div id="modal-content" class="bg-[#1e293b] border border-gray-700 rounded-3xl overflow-hidden shadow-2xl relative">
+            
+                <div class="h-3 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-600"></div>
+                
+                <div class="p-8 text-center relative">
+                    <button onclick="closeTicketModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-gray-400 hover:text-white transition">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+
+                    <h3 class="text-pink-500 text-xs font-bold uppercase tracking-[0.2em] mb-3">Vé Điện Tử</h3>
+                    <h2 id="modal-movie-title" class="text-2xl font-bold text-white mb-6 leading-tight">Tên Phim</h2>
+
+                   
+                    <div class="bg-white p-3 rounded-xl mx-auto w-48 h-48 mb-4 shadow-lg flex items-center justify-center relative group cursor-pointer">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=CINEPRO-TICKET-DEMO" alt="QR Code" class="w-full h-full group-hover:opacity-90 transition">
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                            <i class="fa-solid fa-magnifying-glass-plus text-black text-2xl bg-white/80 p-2 rounded-full"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-6">Đưa mã này cho nhân viên soát vé tại rạp</p>
+
+                 
+                    <div class="bg-gray-900/50 border border-gray-700/50 rounded-xl p-5 text-left space-y-3 text-sm">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400 flex items-center gap-2"><i class="fa-solid fa-video text-gray-600"></i> Rạp</span>
+                            <span id="modal-cinema" class="font-bold text-pink-400 text-right max-w-[60%] truncate">Tên Rạp</span>
+                        </div>
+                        <div class="border-b border-dashed border-gray-700 my-2"></div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400 flex items-center gap-2"><i class="fa-regular fa-clock text-gray-600"></i> Suất chiếu</span>
+                            <span id="modal-time" class="font-bold text-white">HH:MM - DD/MM</span>
+                        </div>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-gray-400 flex items-center gap-2"><i class="fa-solid fa-couch text-gray-600"></i> Ghế</span>
+                            <span id="modal-seat" class="font-bold text-white bg-gray-700 px-2 py-0.5 rounded text-xs">XX, YY</span>
+                        </div>
+                        <div class="border-t border-gray-700 pt-3 mt-3 flex justify-between items-center">
+                            <span class="text-gray-400">Tổng thanh toán</span>
+                            <span id="modal-price" class="font-bold text-xl text-green-400">000.000đ</span>
+                        </div>
+                    </div>
+                </div>
+                
+              
+                <div class="p-4 bg-gray-950 flex gap-3 border-t border-gray-800">
+                    <button class="flex-1 py-3 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-semibold transition text-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-download"></i> Tải Vé
+                    </button>
+                    <button onclick="closeTicketModal()" class="flex-1 py-3 rounded-xl bg-pink-600 hover:bg-pink-500 text-white font-semibold transition text-sm">
+                        Đóng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+     
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('active');
+                el.classList.add('text-gray-400'); 
+                el.classList.remove('text-white', 'bg-pink-600', 'shadow-lg');
+            });
+            document.getElementById(tabId).classList.add('active');
+            const activeBtn = document.getElementById('btn-' + tabId);
+            activeBtn.classList.add('active');
+            activeBtn.classList.remove('text-gray-400');
+        }
+
+        
+        function filterTickets(status, btnElement) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active', 'text-white');
+                btn.classList.add('text-gray-400');
+            });
+            btnElement.classList.add('active', 'text-white');
+            btnElement.classList.remove('text-gray-400');
+            document.querySelectorAll('.ticket-item').forEach(ticket => {
+                const ticketStatus = ticket.getAttribute('data-status');
+                if (status === 'all' || ticketStatus === status) {
+                    ticket.classList.remove('hidden');
+                } else {
+                    ticket.classList.add('hidden');
+                }
+            });
+        }
+
+        const modal = document.getElementById('ticket-modal');
+        const modalContent = document.getElementById('modal-content');
+
+        function openTicketModal(title, cinema, time, seat, price, status) {
+         
+            document.getElementById('modal-movie-title').innerText = title;
+            document.getElementById('modal-cinema').innerText = cinema;
+            document.getElementById('modal-time').innerText = time;
+            document.getElementById('modal-seat').innerText = seat;
+            document.getElementById('modal-price').innerText = price;
+
+          
+            modal.classList.remove('hidden');
+            modalContent.classList.add('modal-enter');
+        }
+
+        function closeTicketModal() {
+            modal.classList.add('hidden');
+            modalContent.classList.remove('modal-enter');
+        }
+    </script>
+</body>
+</html>
